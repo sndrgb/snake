@@ -7,6 +7,8 @@ export default class Game {
 
     this.cellSize = 30;
     this.cellCount = canvas.width / this.cellSize;
+    this.before = new Date().getTime();
+
     this.createInterval();
   }
 
@@ -22,8 +24,17 @@ export default class Game {
   update() {
     requestAnimationFrame(this.updateWithForcedContext);
 
-    const head = { ...this.snake.segments[0] }; // {x: 0, y: 4}
+    this.now = new Date().getTime();
+    const delta = this.now - this.before;
+    const interval = 1000 / 8;
 
+    if (delta > interval) {
+      this.before = this.now - (delta % interval);
+    } else {
+      return;
+    }
+
+    const head = { ...this.snake.segments[0] }; // {x: 0, y: 4}
     const direction = this.snake.direction;
 
     switch (direction) {
@@ -35,10 +46,11 @@ export default class Game {
         break;
       case "down":
         head.y = head.y + 1;
+        if (head.y === this.cellCount) {
+          head.y = 0;
+        }
         break;
     }
-
-    console.log(this.snake.segments);
 
     this.snake.move(head);
 
