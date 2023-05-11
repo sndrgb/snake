@@ -60,6 +60,10 @@ export default class Snake {
     });
   }
 
+  setDirection(direction) {
+    this.direction = direction;
+  }
+
   move(head) {
     this.segments.pop();
     this.segments.unshift(head);

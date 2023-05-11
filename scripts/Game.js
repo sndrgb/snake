@@ -10,6 +10,23 @@ export default class Game {
     this.before = new Date().getTime();
 
     this.createInterval();
+    this.eventListeners();
+  }
+
+  eventListeners() {
+    const handleEvent = (event) => {
+      const possibleEvents = {
+        ArrowUp: "up",
+        ArrowDown: "down",
+        ArrowLeft: "left",
+        ArrowRight: "right",
+      };
+
+      const direction = possibleEvents[event.code];
+      this.snake.setDirection(direction);
+    };
+
+    document.addEventListener("keydown", handleEvent);
   }
 
   play() {
