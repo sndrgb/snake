@@ -1,4 +1,9 @@
 import Snake from "./Snake.js";
+import Food from "./Food.js";
+
+const getRandomInteger = (max) => {
+  return Math.floor(Math.random() * max);
+};
 
 export default class Game {
   constructor() {
@@ -6,7 +11,7 @@ export default class Game {
     this.ctx = canvas.getContext("2d");
 
     this.cellSize = 30;
-    this.cellCount = canvas.width / this.cellSize;
+    this.cellCount = canvas.width / this.cellSize; // 18
     this.before = new Date().getTime();
 
     this.createInterval();
@@ -22,8 +27,21 @@ export default class Game {
         ArrowRight: "right",
       };
 
-      const direction = possibleEvents[event.code];
+      const direction = possibleEvents[event.code]; // 'up'
+
+      if (
+        (direction === "up" && this.snake.direction === "down") ||
+        (direction === "down" && this.snake.direction === "up") ||
+        (direction === "left" && this.snake.direction === "right") ||
+        (direction === "right" && this.snake.direction === "left")
+      ) {
+        return;
+      }
+
+      // this.snake.direction; // 'down
+
       this.snake.setDirection(direction);
+      // this.snake.direction; // 'up'
     };
 
     document.addEventListener("keydown", handleEvent);
@@ -31,6 +49,7 @@ export default class Game {
 
   play() {
     this.spawnSnake();
+    this.spawnFood();
   }
 
   createInterval() {
@@ -56,10 +75,22 @@ export default class Game {
 
     switch (direction) {
       case "left":
+        if (head.x === 0) {
+          head.x = this.cellCount;
+        }
+        head.x = head.x - 1;
         break;
       case "right":
+        head.x = head.x + 1;
+        if (head.x === this.cellCount) {
+          head.x = 0;
+        }
         break;
       case "up":
+        if (head.y === 0) {
+          head.y = this.cellCount;
+        }
+        head.y = head.y - 1;
         break;
       case "down":
         head.y = head.y + 1;
@@ -69,10 +100,19 @@ export default class Game {
         break;
     }
 
+    const hasEaten = head.x === this.food.x && head.y === this.food.y; // true | false
+
+    console.log(hasEaten);
+
     this.snake.move(head);
 
     this.ctx.clearRect(0, 0, 540, 540);
+
+    this.ctx.fillStyle = "yellow";
+    this.ctx.fillRect(0, 0, 540, 540);
+
     this.snake.render(this.ctx, this.cellSize);
+    this.food.render(this.ctx, this.cellSize);
   }
 
   spawnSnake() {
@@ -89,6 +129,14 @@ export default class Game {
     this.snake = new Snake(directions[2]);
     this.snake.createSegments(headX, headY, tailX, tailY);
     this.snake.render(ctx, cellSize);
+  }
+
+  spawnFood() {
+    const x = getRandomInteger(this.cellCount + 1);
+    const y = getRandomInteger(this.cellCount + 1);
+
+    this.food = new Food(x, y);
+    this.food.render(this.ctx, this.cellSize);
   }
 
   endGame() {}

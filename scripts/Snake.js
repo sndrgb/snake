@@ -42,6 +42,8 @@ export default class Snake {
   }
 
   render(ctx, cellSize) {
+    ctx.fillStyle = "blue";
+
     // questo è il nostro array
     // segments = [
     //   { x: 0, y: 0 }, 0
@@ -61,7 +63,14 @@ export default class Snake {
   }
 
   setDirection(direction) {
-    this.direction = direction;
+    if (
+      direction === "left" ||
+      direction === "right" ||
+      direction === "up" ||
+      direction === "down"
+    ) {
+      this.direction = direction;
+    }
   }
 
   move(head) {
