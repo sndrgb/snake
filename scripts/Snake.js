@@ -73,8 +73,10 @@ export default class Snake {
     }
   }
 
-  move(head) {
-    this.segments.pop();
+  move(head, hasEaten) {
+    if (!hasEaten) {
+      this.segments.pop();
+    }
     this.segments.unshift(head);
   }
 }

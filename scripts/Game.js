@@ -10,6 +10,7 @@ export default class Game {
     const canvas = document.querySelector("#game");
     this.ctx = canvas.getContext("2d");
 
+    this.speed = 8;
     this.cellSize = 30;
     this.cellCount = canvas.width / this.cellSize; // 18
     this.before = new Date().getTime();
@@ -48,21 +49,27 @@ export default class Game {
   }
 
   play() {
+    this.score = 0;
+    this.playing = true;
     this.spawnSnake();
     this.spawnFood();
   }
 
   createInterval() {
     this.updateWithForcedContext = this.update.bind(this);
-    requestAnimationFrame(this.updateWithForcedContext);
+    this.raf = requestAnimationFrame(this.updateWithForcedContext);
   }
 
   update() {
     requestAnimationFrame(this.updateWithForcedContext);
 
+    if (!this.playing) {
+      return;
+    }
+
     this.now = new Date().getTime();
     const delta = this.now - this.before;
-    const interval = 1000 / 8;
+    const interval = 1000 / this.speed;
 
     if (delta > interval) {
       this.before = this.now - (delta % interval);
@@ -102,9 +109,27 @@ export default class Game {
 
     const hasEaten = head.x === this.food.x && head.y === this.food.y; // true | false
 
-    console.log(hasEaten);
+    if (hasEaten) {
+      this.score = this.score + 1;
 
-    this.snake.move(head);
+      if (this.score % 5 === 0) {
+        this.speed = this.speed + 2;
+      }
+
+      delete this.food;
+      this.spawnFood();
+    }
+
+    const tail = this.snake.segments.slice(1);
+    const hasCollision = tail.some((element) => {
+      return head.x === element.x && head.y === element.y;
+    });
+
+    if (hasCollision) {
+      this.gameOver();
+    }
+
+    this.snake.move(head, hasEaten);
 
     this.ctx.clearRect(0, 0, 540, 540);
 
@@ -132,14 +157,26 @@ export default class Game {
   }
 
   spawnFood() {
-    const x = getRandomInteger(this.cellCount + 1);
-    const y = getRandomInteger(this.cellCount + 1);
+    const x = getRandomInteger(this.cellCount);
+    const y = getRandomInteger(this.cellCount);
+
+    const checkFoodPosition = this.snake.segments.some((element) => {
+      return x === element.x && y === element.y;
+    });
+
+    if (checkFoodPosition) {
+      console.log("il cibo è sotto");
+      this.spawnFood();
+    }
 
     this.food = new Food(x, y);
     this.food.render(this.ctx, this.cellSize);
   }
 
-  endGame() {}
+  gameOver() {
+    this.playing = false;
+    console.log("THE END");
+  }
 
   testCanvas() {
     // SET FILL STYLE IN GIALLO
